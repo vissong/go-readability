@@ -12,8 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	readability "github.com/go-shiori/go-readability"
 	"github.com/spf13/cobra"
+
+	"github.com/vissong/go-readability"
 )
 
 const index = `<!DOCTYPE HTML>
@@ -129,8 +130,10 @@ func getContent(srcPath string, metadataOnly bool) (string, error) {
 
 	// Make sure the page is readable
 	if !readability.Check(tee) {
-		return "", fmt.Errorf("failed to parse page: the page is not readable")
+		fmt.Println("the page is not readable")
+		// return "", fmt.Errorf("failed to parse page: the page is not readable")
 	}
+	fmt.Println(buf.String())
 
 	// Get readable content from the reader
 	article, err := readability.FromReader(buf, pageURL)

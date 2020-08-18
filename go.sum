@@ -29,6 +29,8 @@ github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 h1:zx4B0AiwqKDQq+AgqxWeHwbbLJQeidq20hgfP+aMNWI=
 github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65/go.mod h1:NPO1+buE6TYOWhUI98/hXLHHJhunIpXRuvDN4xjkCoE=
+github.com/go-shiori/go-readability v0.0.0-20231029095239-6b97d5aba789 h1:G6wSuUyCoLB9jrUokipsmFuRi8aJozt3phw/g9Sl4Xs=
+github.com/go-shiori/go-readability v0.0.0-20231029095239-6b97d5aba789/go.mod h1:2DpZlTJO/ycxp/vsc/C11oUyveStOgIXB88SYV1lncI=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.1/go.mod h1:hp+jE20tsWTFYpLwKvXlhS1hjn+gTNwPg2I6zVXpSg4=

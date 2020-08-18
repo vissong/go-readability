@@ -13,8 +13,9 @@ import (
 	"time"
 
 	"github.com/go-shiori/dom"
-	readability "github.com/go-shiori/go-readability"
 	"golang.org/x/net/html"
+
+	"github.com/vissong/go-readability"
 )
 
 var httpClient = &http.Client{Timeout: time.Minute}

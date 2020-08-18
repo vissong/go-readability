@@ -74,7 +74,6 @@ func (ps *Parser) ParseDocument(doc *html.Node, pageURL *nurl.URL) (Article, err
 
 	if articleContent != nil {
 		ps.postProcessContent(articleContent)
-
 		// If we haven't found an excerpt in the article's metadata,
 		// use the article's first paragraph as the excerpt. This is used
 		// for displaying a preview of the article's content.
@@ -84,11 +83,24 @@ func (ps *Parser) ParseDocument(doc *html.Node, pageURL *nurl.URL) (Article, err
 				metadata["excerpt"] = strings.TrimSpace(dom.TextContent(paragraphs[0]))
 			}
 		}
-
+		// if not found image in metadata, then use the first image in article
+		if metadata["image"] == "" {
+			images := dom.GetElementsByTagName(articleContent, "img")
+			if len(images) > 0 {
+				metadata["image"] = dom.GetAttribute(images[0], "src")
+			}
+		}
 		readableNode = dom.FirstElementChild(articleContent)
 		finalHTMLContent = dom.InnerHTML(articleContent)
 		finalTextContent = dom.TextContent(articleContent)
 		finalTextContent = strings.TrimSpace(finalTextContent)
+	}
+	// if not found image in metadata and article, then use the first image in page
+	if metadata["image"] == "" {
+		images := dom.GetElementsByTagName(ps.doc, "img")
+		if len(images) > 0 {
+			metadata["image"] = dom.GetAttribute(images[0], "src")
+		}
 	}
 
 	finalByline := metadata["byline"]

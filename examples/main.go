@@ -1,5 +1,3 @@
-// +build ignore
-
 package main
 
 import (
@@ -7,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	readability "github.com/go-shiori/go-readability"
+	"github.com/vissong/go-readability"
 )
 
 func main() {
-	url := "https://www.wired.com/story/a-crashed-israeli-lunar-lander-spilled-tardigrades-on-the-moon/"
+	url := "https://y.qq.com/"
 
 	article, err := readability.FromURL(url, 30*time.Second)
 	if err != nil {
