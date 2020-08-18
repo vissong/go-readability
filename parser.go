@@ -32,6 +32,7 @@ var (
 	rxWhitespace           = regexp.MustCompile(`(?i)^\s*$`)
 	rxHasContent           = regexp.MustCompile(`(?i)\S$`)
 	rxPropertyPattern      = regexp.MustCompile(`(?i)\s*(dc|dcterm|og|twitter)\s*:\s*(author|creator|description|title|site_name|image\S*)\s*`)
+	rxItemPropertyPattern  = regexp.MustCompile(`(?i)(description|name|image)\s*`)
 	rxNamePattern          = regexp.MustCompile(`(?i)^\s*(?:(dc|dcterm|og|twitter|weibo:(article|webpage))\s*[\.:]\s*)?(author|creator|description|title|site_name|image)\s*$`)
 	rxTitleSeparator       = regexp.MustCompile(`(?i) [\|\-\\/>»] `)
 	rxTitleHierarchySep    = regexp.MustCompile(`(?i) [\\/>»] `)
@@ -1172,6 +1173,7 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 	ps.forEachNode(metaElements, func(element *html.Node, _ int) {
 		elementName := dom.GetAttribute(element, "name")
 		elementProperty := dom.GetAttribute(element, "property")
+		itemProperty := dom.GetAttribute(element, "itemprop")
 		content := dom.GetAttribute(element, "content")
 		if content == "" {
 			return
@@ -1181,6 +1183,19 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 
 		if elementProperty != "" {
 			matches = rxPropertyPattern.FindAllString(elementProperty, -1)
+			for i := len(matches) - 1; i >= 0; i-- {
+				// Convert to lowercase, and remove any whitespace
+				// so we can match belops.
+				name = strings.ToLower(matches[i])
+				name = strings.Join(strings.Fields(name), "")
+				// multiple authors
+				values[name] = strings.TrimSpace(content)
+			}
+		}
+
+		// parse tencent urlrich metadata
+		if itemProperty != "" {
+			matches = rxItemPropertyPattern.FindAllString(itemProperty, -1)
 			for i := len(matches) - 1; i >= 0; i-- {
 				// Convert to lowercase, and remove any whitespace
 				// so we can match belops.
@@ -1897,6 +1912,9 @@ func (ps *Parser) Parse(input io.Reader, pageURL string) (Article, error) {
 	// Prepares the HTML document
 	ps.prepDocument()
 
+	// s := dom.OuterHTML(ps.doc)
+	// fmt.Println(s)
+
 	// Fetch metadata
 	metadata := ps.getArticleMetadata()
 	ps.articleTitle = metadata["title"]
@@ -1908,6 +1926,8 @@ func (ps *Parser) Parse(input io.Reader, pageURL string) (Article, error) {
 	var readableNode *html.Node
 
 	if articleContent != nil {
+		// fmt.Println(dom.OuterHTML(articleContent))
+		// fmt.Println()
 		ps.postProcessContent(articleContent)
 
 		// If we haven't found an excerpt in the article's metadata,
@@ -1920,10 +1940,26 @@ func (ps *Parser) Parse(input io.Reader, pageURL string) (Article, error) {
 			}
 		}
 
+		// 如果metadata里的图片为空，从正文内容第一张图
+		if metadata["image"] == "" {
+			images := dom.GetElementsByTagName(articleContent, "img")
+			if len(images) > 0 {
+				metadata["image"] = dom.GetAttribute(images[0], "src")
+			}
+		}
+
 		readableNode = dom.FirstElementChild(articleContent)
 		finalHTMLContent = dom.InnerHTML(articleContent)
 		finalTextContent = dom.TextContent(articleContent)
 		finalTextContent = strings.TrimSpace(finalTextContent)
+	}
+
+	// 如果metadata里的图片还为空，从整个页面中取第一张图
+	if metadata["image"] == "" {
+		images := dom.GetElementsByTagName(ps.doc, "img")
+		if len(images) > 0 {
+			metadata["image"] = dom.GetAttribute(images[0], "src")
+		}
 	}
 
 	finalByline := metadata["byline"]
