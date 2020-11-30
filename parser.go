@@ -32,7 +32,7 @@ var (
 	rxWhitespace           = regexp.MustCompile(`(?i)^\s*$`)
 	rxHasContent           = regexp.MustCompile(`(?i)\S$`)
 	rxPropertyPattern      = regexp.MustCompile(`(?i)\s*(dc|dcterm|og|twitter)\s*:\s*(author|creator|description|title|site_name|image\S*)\s*`)
-	rxItemPropertyPattern  = regexp.MustCompile(`(?i)(description|name|image)\s*`)
+	rxItemPropertyPattern  = regexp.MustCompile(`(?i)(^description|^name|^image)\s*`)
 	rxNamePattern          = regexp.MustCompile(`(?i)^\s*(?:(dc|dcterm|og|twitter|weibo:(article|webpage))\s*[\.:]\s*)?(author|creator|description|title|site_name|image)\s*$`)
 	rxTitleSeparator       = regexp.MustCompile(`(?i) [\|\-\\/>»] `)
 	rxTitleHierarchySep    = regexp.MustCompile(`(?i) [\\/>»] `)
@@ -1195,6 +1195,7 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 
 		// parse tencent urlrich metadata
 		if itemProperty != "" {
+			// fmt.Println(itemProperty)
 			matches = rxItemPropertyPattern.FindAllString(itemProperty, -1)
 			for i := len(matches) - 1; i >= 0; i-- {
 				// Convert to lowercase, and remove any whitespace
@@ -1202,9 +1203,10 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 				name = strings.ToLower(matches[i])
 				name = strings.Join(strings.Fields(name), "")
 				// multiple authors
-				values[name] = strings.TrimSpace(content)
+				values["tencent:"+name] = strings.TrimSpace(content)
 			}
 		}
+		// fmt.Println(values)
 
 		if len(matches) == 0 && elementName != "" && rxNamePattern.MatchString(elementName) {
 			// Convert to lowercase, remove any whitespace, and convert
@@ -1219,7 +1221,7 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 	// get title
 	metadataTitle := ""
 	possibleAttrNames := []string{
-		"dc:title", "dcterm:title", "og:title", "weibo:article:title",
+		"tencent:name", "dc:title", "dcterm:title", "og:title", "weibo:article:title",
 		"weibo:webpage:title", "title", "twitter:title"}
 	for _, name := range possibleAttrNames {
 		if value, ok := values[name]; ok {
@@ -1245,7 +1247,7 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 	// get description
 	metadataExcerpt := ""
 	possibleAttrNames = []string{
-		"dc:description", "dcterm:description", "og:description",
+		"tencent:description", "dc:description", "dcterm:description", "og:description",
 		"weibo:article:description", "weibo:webpage:description",
 		"description", "twitter:description"}
 	for _, name := range possibleAttrNames {
@@ -1260,7 +1262,7 @@ func (ps *Parser) getArticleMetadata() map[string]string {
 
 	// get image thumbnail
 	metadataImage := ""
-	possibleAttrNames = []string{"og:image", "image", "twitter:image"}
+	possibleAttrNames = []string{"tencent:image", "og:image", "image", "twitter:image"}
 	for _, name := range possibleAttrNames {
 		if value, ok := values[name]; ok {
 			metadataImage = toAbsoluteURI(value, ps.documentURI)
